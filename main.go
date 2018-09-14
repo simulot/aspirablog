@@ -10,12 +10,13 @@ import (
 )
 
 type params struct {
-	ConfigFile   string
-	BlogName     string
-	BlogURL      string
-	BlogProvider string
-	Destination  string
-	TextFormat   string
+	ConfigFile    string
+	BlogName      string
+	BlogURL       string
+	BlogProvider  string
+	Destination   string
+	TextFormat    string
+	BloggerAPIKey string
 }
 
 type Application struct {
@@ -29,7 +30,8 @@ func main() {
 	flag.StringVar(&p.BlogURL, "url", "", "Blog's url")
 	flag.StringVar(&p.BlogName, "name", "", "Blog's name")
 	flag.StringVar(&p.Destination, "destination", "blogs", "Destination folder")
-	flag.StringVar(&p.Destination, "provider", "blogger", "Blog provider (blogger)")
+	flag.StringVar(&p.BlogProvider, "provider", "blogger", "Blog provider (blogger)")
+	flag.StringVar(&p.BloggerAPIKey, "blogger-key", "", "Blogger API key")
 	flag.Parse()
 
 	if len(flag.Args()) == 0 {
@@ -39,10 +41,11 @@ func main() {
 	c, err := ReadConfigFile(p.ConfigFile)
 	if os.IsNotExist(err) {
 		c = &Config{
-			Folder:       p.Destination,
-			BlogURL:      p.BlogURL,
-			BlogProvider: p.BlogProvider,
-			BlogName:     p.BlogName,
+			Folder:        p.Destination,
+			BlogURL:       p.BlogURL,
+			BlogProvider:  p.BlogProvider,
+			BlogName:      p.BlogName,
+			BloggerAPIKey: p.BloggerAPIKey,
 		}
 	} else {
 		check(err)

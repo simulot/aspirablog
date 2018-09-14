@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -35,6 +37,8 @@ type HTTPCacher interface {
 
 func (a *Application) Export(format string) error {
 	httpClient := http.New(a.cache, 10*time.Second)
+	err := os.MkdirAll(filepath.Join(a.config.Folder, a.config.BlogName), 0700)
+	check(errors.Wrapf(err, "Application can't Export"))
 	p, err := a.NewProvider(httpClient)
 
 	check(errors.Wrapf(err, "Application can't Export"))
@@ -57,7 +61,8 @@ func (a *Application) NewProvider(http HTTPGetter) (BlogProvider, error) {
 
 	switch a.config.BlogProvider {
 	case "blogger":
-		return blogger.New(a.config.BlogName, a.config.BlogURL, http), nil
+		log.Printf("Reading blog at %s\n", a.config.BlogURL)
+		return blogger.New(a.config.BlogName, a.config.BlogURL, a.config.BloggerAPIKey, http), nil
 	}
 	return nil, errors.Errorf("Unsupported blog provider: %s", a.config.BlogProvider)
 }

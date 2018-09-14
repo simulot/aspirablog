@@ -9,13 +9,14 @@ import (
 )
 
 type Config struct {
-	BlogName     string
-	BlogURL      string
-	BlogProvider string
-	LastETAG     string
-	Folder       string
-	ImageFormat  string
-	TextFormat   string
+	BlogName      string
+	BlogURL       string
+	BlogProvider  string
+	LastETAG      string
+	Folder        string
+	ImageFormat   string
+	TextFormat    string
+	BloggerAPIKey string
 }
 
 func ReadConfigFile(file string) (*Config, error) {

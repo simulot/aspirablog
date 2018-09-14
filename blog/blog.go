@@ -3,12 +3,12 @@ package blog
 import "time"
 
 type Blog struct {
-	Title       string            // Blog title as retrieved from service
-	URL         string            // Blog url
-	Authors     []string          // Author list
-	LastUpdated time.Time         // Last update by authors
-	LastChecked time.Time         // Last check
-	Categories  []string          // Category list as retrieved from the service
-	CategoryMap map[string]string // Simplify the categories
-	Posts       []Post            // Posts retrieved from the service
+	Title       string    // Blog title as retrieved from service
+	Description string    // Blog subtitle
+	URL         string    // Blog url
+	Authors     []string  // Author list
+	Updated     time.Time // Last update by authors
+	Published   time.Time // Blog opening time
+	Label       []string  // Category list as retrieved from the service
+	Posts       []Post    // Posts retrieved from the service
 }

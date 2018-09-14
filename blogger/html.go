@@ -1,7 +1,6 @@
 package blogger
 
 import (
-	"log"
 	"regexp"
 	"strings"
 
@@ -84,10 +83,6 @@ func (b *Blogger) parseImage(n *html.Node) blog.Image {
 		return image
 	}
 
-	_, _, err := b.http.Get(image.URL)
-	if err != nil {
-		log.Printf("URL %s cached: %v", image.URL, err)
-	}
 	return image
 }
 
