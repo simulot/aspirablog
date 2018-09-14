@@ -1,13 +1,11 @@
 package blogger
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/pkg/errors"
 
 	"github.com/simulot/aspirablog/blog"
-	"github.com/simulot/aspirablog/blogger/atom"
 )
 
 type HTTPGetter interface {
@@ -16,58 +14,65 @@ type HTTPGetter interface {
 }
 
 type Blogger struct {
-	http HTTPGetter
-	url  string
-	name string
+	service *Service
+	http    HTTPGetter
+	url     string
+	name    string
 }
 
-func New(name string, url string, http HTTPGetter) *Blogger {
+func New(name string, url string, apiKey string, http HTTPGetter) *Blogger {
 	return &Blogger{
-		name: name,
-		url:  url,
-		http: http,
+		service: NewService(http, apiKey),
+		name:    name,
+		url:     url,
 	}
-}
-
-func (b Blogger) feedUrl(number int) string {
-	return fmt.Sprintf("%s/feeds/posts/default?alt=json&max-results=%d", b.url, number)
 }
 
 func (b *Blogger) GetAll() (blog.Blog, error) {
 	bl := blog.Blog{}
-	url := b.feedUrl(10)
-	buffer, _, err := b.http.Get(url)
+	blBlog, err := b.service.ByURL(b.url)
 	if err != nil {
 		return bl, errors.Wrapf(err, "Can't GetAll %s: %v", b.name, err)
 	}
 
-	feed, err := atom.Decode(buffer)
-	if err != nil {
-		return bl, err
+	bl = blog.Blog{
+		Title:       blBlog.Name,
+		Description: blBlog.Description,
+		Published:   blBlog.Published,
+		Updated:     blBlog.Updated,
+		URL:         blBlog.URL,
+		Posts:       []blog.Post{},
 	}
 
-	bl.Title = blog.TextLinter(feed.Feed.Title.Content)
-	bl.Posts = []blog.Post{}
-
-	for e, entry := range feed.Feed.Entries {
-		post := blog.Post{
-			Title:      blog.AllCapLinter(entry.Title.Content),
-			Published:  entry.Published.Time,
-			Categories: []string{},
-		}
-
-		for _, c := range entry.Categories {
-			post.Categories = append(post.Categories, string(c))
-		}
-		log.Printf("Parsing entry %d: %s\n", e, post.Title)
-
-		par, err := b.parsePost(entry.Content.Content)
+	nextPageToken := ""
+	for {
+		list, err := b.service.List(nextPageToken)
 		if err != nil {
-			log.Print("Can't parse blogger entry #", e)
-			continue
+			return bl, errors.Wrapf(err, "Can't GetAll %s: %v", b.name, err)
 		}
-		post.Paragraph = par
-		bl.Posts = append(bl.Posts, post)
+		for _, item := range list.Items {
+			par, err := b.parsePost(item.Content)
+			if err != nil {
+				log.Print("Can't parse blogger entry #", err)
+				continue
+			}
+			bl.Posts = append(
+				bl.Posts,
+				blog.Post{
+					Author:     item.Author.DisplayName,
+					Categories: item.Labels,
+					Published:  item.Published,
+					Title:      blog.AllCapLinter(item.Title),
+					URL:        item.URL,
+					Paragraph:  par,
+				},
+			)
+		}
+		nextPageToken = list.NextPageToken
+		if len(nextPageToken) == 0 {
+			break
+		}
 	}
+
 	return bl, err
 }

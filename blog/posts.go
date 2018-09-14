@@ -10,6 +10,7 @@ type Post struct {
 	Author     string    // Post author
 	Categories []string  // Post categories
 	Published  time.Time // Post publication time
+	URL        string    // HTML url
 	Paragraph  Paragraph // Content
 }
 

@@ -35,6 +35,10 @@ var textLinter = NewTextLinter([]string{
 	`\b[\s\p{Zs}]*([;:?!])[\s\p{Zs}]*$`, "\u00A0$1", // Insert non breakable space after ponctuation
 })
 
+var titleLinter = NewTextLinter([]string{
+	`^[\p{Zs}]*|[\s\p{Zs}]*$`, ``,
+})
+
 func applyReplacers(s string, rs []replacer) string {
 	b := []byte(s)
 	for _, r := range rs {
@@ -48,5 +52,7 @@ func TextLinter(t string) string {
 }
 
 func AllCapLinter(t string) string {
-	return strings.ToUpper(applyReplacers(t, textLinter))
+	t = applyReplacers(t, textLinter)
+	t = applyReplacers(t, titleLinter)
+	return strings.ToUpper(t)
 }

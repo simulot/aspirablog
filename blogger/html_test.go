@@ -59,8 +59,7 @@ func Test_nodeStyle(t *testing.T) {
 					Attr: []html.Attribute{
 						{Namespace: "", Key: "style", Val: "color: blue; align: center; background:"},
 					},
-				},+
-				+96
+				},
 				style: "forecolor",
 			},
 			"",
